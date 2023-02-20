@@ -1,6 +1,5 @@
 from os import PathLike
 from pathlib import Path
-
 import cv2
 import numpy as np
 import torch
@@ -8,9 +7,10 @@ from PIL import Image
 from numpy import linalg
 from torch import nn
 from torchvision import transforms, models
-
-from kts.cpd_auto import cpd_auto ##kernel temporal segmentation with autocalibration
-
+import time
+from kts.cpd_auto import cpd_auto, cpd_nonlin
+import moviepy.editor as mp
+from adot_detection import load_detection_model, detection_run
 
 class FeatureExtractor(object):
     def __init__(self):
@@ -37,57 +37,85 @@ class FeatureExtractor(object):
         feat /= linalg.norm(feat) + 1e-10
         return feat
 
-
 class VideoPreprocessor(object):
-    def __init__(self, sample_rate: int) -> None:
+    def __init__(self, sample_rate: int, output_audio_path: str) -> None:
         self.model = FeatureExtractor()
         self.sample_rate = sample_rate
-        '''
-        VideoPreprocessor():
-            get_feature: frame sampling & googlenet 특징 추출 
-            kts(kernel temporal segment): change point 에 따른 프레임 구간 스플릿 
+        self.output_audio_path = output_audio_path
 
+    def get_features(self, video_path_lst: PathLike):
         '''
-    def get_features(self, video_path: PathLike):
-        '''
-        1) video path 에서 영상을 load 한 뒤, sampling rate 마다 frame sampling
-        2) googlenet을 특징 추출기로 사용해 프레임들의 특징 추출 
-
-        return
-            - n_frames: # of smapling frame 
-            - features: 샘플링 된 frame들의 feature 
-        '''
-        video_path = Path(video_path)
-        cap = cv2.VideoCapture(str(video_path))
-        assert cap is not None, f'Cannot open video: {video_path}'
-
+        gey video frames features & extracted audioclip 
+        ''' 
+        # yolo detectin 
+        weights =  "yolov5s.pt"
+        source =[]
+        frame_obj_lst = []
+        model, stride, names, pt = load_detection_model(weights = weights) # load model 
+        # frame feature 
         features = []
         n_frames = 0
+        audio_clips = [] 
+        tmp_num = 0 
+        for i in range(len(video_path_lst)):
+            video_path = video_path_lst[i]
+            # video_path = Path(video_path)
 
-        while True:
-            ret, frame = cap.read()
-            if not ret:
-                break
+            videoclip = mp.VideoFileClip(video_path) 
+            audioclip = videoclip.audio #영상의 오디오 추출 
+            audio_clips.append(audioclip)
+            
+            cap = cv2.VideoCapture(str(video_path))
+            fps = cap.get(cv2.CAP_PROP_FPS)
 
-            if n_frames % self.sample_rate == 0: #smapling rate 마다 frame 추출 
-                frame = cv2.cvtColor(frame, cv2.COLOR_BGR2RGB)
-                feat = self.model.run(frame) ##googlenet을 거쳐 추출된 feature ###프레임의 특징 추출기 
-                features.append(feat)
+            assert cap is not None, f'Cannot open video: {video_path}'
+            
+            start = time.time()
+            while True:
+                # ret, frame = cap.read() #read() = grab() + retrieve() 
+                ret = cap.grab()
+                ret, frame = cap.retrieve()
 
-            n_frames += 1
+                if not ret:
+                    break
+                
+                if n_frames % self.sample_rate == 0:
+                    # object detection 
+                    tmp_num += 1
+                    if tmp_num % 5 == 0: 
+                        obj_dict = detection_run(source = "", model= model, stride = stride, names = names, pt = pt, im0 =frame)
+                        frame_obj_lst.append((int(n_frames/self.sample_rate), obj_dict))
+                        tmp_num = 0
 
-        cap.release()
+                    # CNN feature extraction 
+                    frame = cv2.cvtColor(frame, cv2.COLOR_BGR2RGB) 
+                    feat = self.model.run(frame)
+                    features.append(feat)
+          
+                n_frames += 1
+
+            end = time.time()
+            print(f"cap time: {(end-start)//60}min {(end-start)%60}s")
+            cap.release()
 
         features = np.array(features)
-        return n_frames, features
 
-    def kts(self, n_frames, features):
-        seq_len = len(features) #총 샘플링된 프레임의 갯수 
-        picks = np.arange(0, seq_len) * self.sample_rate # 추출된 sample frame의 origin 프레임 상의 위치 
-        
+        final_audioclip = mp.concatenate_audioclips(audio_clips) #영상들의 오디오 하나로 병합 
+        final_audioclip.write_audiofile(self.output_audio_path) #음성파일 저장 
+        print("#"*5,"audio extracted finished!!" ,"#"*5)
+
+        return n_frames, features, fps, frame_obj_lst
+
+    def kts(self, n_frames, features, len_videos):
+        seq_len = len(features)
+        picks = np.arange(0, seq_len) * self.sample_rate
+
         # compute change points using KTS
-        kernel = np.matmul(features, features.T) #내적을 통해 kernel 생성 
-        change_points, _ = cpd_auto(kernel, seq_len - 1, 1, verbose=False) #Square kernel, 최대cp갯수, 
+        max_ncp = seq_len -1
+        kernel = np.matmul(features, features.T)
+        ws_change_points, _ = cpd_nonlin(kernel, len_videos + 3) #사용자에게 입력받는 각 하위 영상마다 구간별로 주제 끊기 
+        ws_change_points *= self.sample_rate
+        change_points, _ = cpd_auto(kernel, max_ncp, 1, verbose=False)
         change_points *= self.sample_rate
         change_points = np.hstack((0, change_points, n_frames))
         begin_frames = change_points[:-1]
@@ -95,17 +123,14 @@ class VideoPreprocessor(object):
         change_points = np.vstack((begin_frames, end_frames - 1)).T
 
         n_frame_per_seg = end_frames - begin_frames
-        return change_points, n_frame_per_seg, picks
+        return change_points, n_frame_per_seg, picks, ws_change_points
 
     def run(self, video_path: PathLike):
-        '''
-        cps: Change points, 2D matrix, each row contains a segment.
-        nfps: Number of frames per segment.
-        picks: Positions of subsampled frames in the original video.
-        '''
-        n_frames, features = self.get_features(video_path) 
-        cps, nfps, picks = self.kts(n_frames, features) 
-        return n_frames, features, cps, nfps, picks 
-
+        n_frames, features, fps, obj = self.get_features(video_path) 
+        print(f"--- done get feature --- n_frames:{n_frames}, len features: {len(features)}") 
+        cps, nfps, picks, ws_cps = self.kts(n_frames, features, len(video_path)) 
+        print(f"# of change points: {len(cps)}") 
+        print("--- done kts ---") 
+        return n_frames, features, cps, nfps, picks, ws_cps, fps, obj
 
 

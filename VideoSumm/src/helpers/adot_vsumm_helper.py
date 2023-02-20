@@ -60,7 +60,9 @@ def get_keyshot_summ(pred: np.ndarray,
                      n_frames: int,
                      nfps: np.ndarray,
                      picks: np.ndarray,
-                     proportion: float = 0.15 #knapsack capacity 
+                     proportion: float = 0.15, #knapsack capacity 
+                     ws_score: list=[], 
+                     ws_cps: list=[]
                      ) -> np.ndarray:
     """Generate keyshot-based video summary i.e. a binary vector.
 
@@ -81,6 +83,23 @@ def get_keyshot_summ(pred: np.ndarray,
         pos_lo = picks[i]
         pos_hi = picks[i + 1] if i + 1 < len(picks) else n_frames
         frame_scores[pos_lo:pos_hi] = pred[i]
+    
+    # ws 구간별 음성 주제분류에 따른 가중치 부여 
+    start_frame = 0 
+    end_frame = 0 
+    cps_idx = 0 
+    for fnum in ws_cps: 
+        end_frame = fnum
+        if ws_score[cps_idx] ==-1:
+            start_frame =  end_frame
+            cps_idx += 1
+            continue 
+        frame_scores[start_frame:end_frame] += ws_score[cps_idx]
+        start_frame =  end_frame
+        cps_idx += 1
+    end_frame = n_frames
+    frame_scores[start_frame:end_frame] += ws_score[cps_idx]
+
 
     # Assign scores to video shots as the average of the frames.
     seg_scores = np.zeros(len(cps), dtype=np.int32) #세그먼트 구분에 따른 점수 len(seg_scores) = len(cps)
@@ -116,7 +135,9 @@ def bbox2summary(seq_len: int,
                  change_points: np.ndarray,
                  n_frames: int,
                  nfps: np.ndarray,
-                 picks: np.ndarray
+                 picks: np.ndarray, 
+                 ws_score: list,
+                 ws_cps:list
                  ) -> np.ndarray:
     """Convert predicted bounding boxes to summary"""
     score = np.zeros(seq_len, dtype=np.float32)
@@ -124,7 +145,7 @@ def bbox2summary(seq_len: int,
         lo, hi = pred_bboxes[bbox_idx, 0], pred_bboxes[bbox_idx, 1]
         score[lo:hi] = np.maximum(score[lo:hi], [pred_cls[bbox_idx]])
 
-    pred_summ, thumb_nail, thumb_nail_scores  = get_keyshot_summ(score, change_points, n_frames, nfps, picks)
+    pred_summ, thumb_nail, thumb_nail_scores  = get_keyshot_summ(score, change_points, n_frames, nfps, picks, ws_score, ws_cps)
     return pred_summ, thumb_nail, thumb_nail_scores#key frames :1, else:0
 
 
@@ -183,3 +204,5 @@ def get_summ_f1score(pred_summ: np.ndarray,
 
     return float(final_f1)
 
+def captioning():
+    

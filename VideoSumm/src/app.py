@@ -4,10 +4,11 @@ import torch
 import torchvision 
 import matplotlib.pyplot as plt  
 from modules.model_zoo import get_model
-from dsnet_main import video_shot_main
+from dsnet_main import video_shot_main, text_classification, makeSumm
 from hashtag import TextRank
 from qwer import qwe
 import urllib.request
+import os 
 
 from torchvision.io.image import read_image
 from torchvision.models.detection import maskrcnn_resnet50_fpn, MaskRCNN_ResNet50_FPN_Weights
@@ -28,7 +29,7 @@ from multiprocessing import Process, Pool
 
 def thumb_nail_main(input_data):
     '''
-    input_data: [list]
+    input_data: [list] 
     '''
     thumbnail_output = qwe(input_data)
     
@@ -65,49 +66,55 @@ def test():
         'video_tag': ['#오늘', '#바다', '#가고싶다']
     }
     
+def save_video(video_url_lst) :
+    save_dir = "../origin_video"
+    source_lst = [] 
 
-def save_video(video_url) :
-    saveName = '../origin_video/video.mp4'
+    for i in range(len(video_url_lst)):
+        video_url = video_url_lst[i]
+        saveName = f"video_{i}.mp4"
+        save_path = os.path.join(save_dir, saveName)
+        urllib.request.urlretrieve(video_url, save_path)
+        source_lst.append(save_path)
 
-    urllib.request.urlretrieve(video_url,saveName)
-    print("저장완료")
-
-    return saveName
+    return source_lst
 
 
 @app.route('/video_summary', methods=['POST'])
 def predict():
-    
+
     data = request.get_json() 
     user_ID = data['user_id'] 
-    video_src = data['video_origin_src'] 
+    video_src_lst = data['video_origin_src'] #list= ['video_scr1', 'video_src2', ..]
+    nickname = data['nickname'] 
+    category = data['category'] 
 
-    video_path = save_video(video_src)
+    source_lst = save_video(video_src_lst) #이 부분은 미리 저장해둬도 괜찮을 듯 
+    print("video download successed from s3!!") 
+
+    save_path = '../output/vlog.mp4'
 
     ##영상요약 
-    # video_src = '../custom_data/videos/test11_shopping.mp4'
-    thumb_input, caption_images = video_shot_main(video_path) #thumb_input: type==list 
-    print(f'len(thumbnail_images): {len(thumb_input)}, len(caption_images): {len(caption_images)}')
+    # video preprocessing & STT & ObjectDetection 
+    total_stt, ws_obj_lst, seq, model, cps, n_frames, nfps, picks, ws_cps = video_shot_main(source_lst) #thumb_input: type==list 
+    # 구간의 음성 주제 분류 
+    ws_score, hashtag = text_classification(category, total_stt, ws_obj_lst)
+    # 가중치 & 요약 영상 만들기, return 썸네일 이미지 
+    thumb_input = makeSumm(seq, model, cps, n_frames, nfps, picks, source_lst, save_path, ws_score, ws_cps)
+    print(f'len(thumbnail_images): {len(thumb_input)}')
     print("video summary successed!!")
+
     ##썸네일 
     # thumb_input = np.load('../output/test/test7_class_thumb_9.npy', allow_pickle= True)
     # thumb_input = thumb_input.tolist()
     thumb_path= thumb_nail_main(thumb_input)
     print("thumbnail successed!!")
-    ##캡셔닝 
-    # caption_images = np.load('/content/drive/MyDrive/skt-flyai /skt-fly-teamHashTag/DSNet/output/test/test10_drawing_thumb_23.npy', allow_pickle = True)
-    sentences = caption_expansion(caption_images)
-    print("captioning successed !!")
-    # print(sentences)
-    ##해시태그 추출 
-    hashtag_output = hashtag_main(sentences)
-    print("해시태그: ", hashtag_output)
-    print("hashtag extracted finished!!")
+    
 
     return {
         'video_image': thumb_path, 
-        'video_path': '../ouput/vlog.mp4',
-        'video_tag': hashtag_output,
+        'video_path': save_path,
+        'video_tag': hashtag,
         'user_ID': user_ID
     }
 

@@ -32,9 +32,9 @@ def get_parser() -> argparse.ArgumentParser:
     parser = argparse.ArgumentParser()
 
     # model type
-    parser.add_argument('--model', type=str, default = 'anchor-based',
+    parser.add_argument('model', type=str,
                         choices=('anchor-based', 'anchor-free'))
-                        
+
     # training & evaluation
     parser.add_argument('--device', type=str, default='cuda',
                         choices=('cuda', 'cpu'))
