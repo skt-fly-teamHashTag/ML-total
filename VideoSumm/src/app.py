@@ -44,6 +44,8 @@ def test():
     
 def save_video(video_url_lst) :
     save_dir = "../origin_video"
+    if not os.path.isdir(save_dir):
+        os.mkdir(save_dir)
     source_lst = [] 
 
     for i in range(len(video_url_lst)):
