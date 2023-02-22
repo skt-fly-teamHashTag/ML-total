@@ -33,8 +33,9 @@ def get_audio_text(path, i, r):
     )
     folder_name = "audio-chunks"
     # create a directory to store the audio chunks
-    if not os.path.isdir(folder_name):
-        os.mkdir(folder_name)
+    if not os.path.exists(folder_name):
+        os.makedirs(folder_name)
+
     # process each chunk 
     for i, audio_chunk in enumerate(chunks, start=1):
         # export audio chunk and save it in
@@ -181,6 +182,19 @@ def text_classification(category, total_stt, ws_obj_lst):
 
     return ws_score, hashtag 
 
+def bgm(vlog_path, bgm_video_path):
+    
+    videoclip = mp.VideoFileClip(vlog_path) #출력 브이로그 영상 
+    audioclip = mp.AudioFileClip("../custom_data/music/music1.mp3") #합성할 배경음 위치
+
+    audio = mp.afx.audio_loop(audioclip, duration=videoclip.duration)
+    # audio.write_audiofile("audio.mp3") ##생성된 음성 파일 저장하기 
+    videoclip.audio = audio
+    videoclip.write_videofile(bgm_video_path)
+
+    return None
+
+
 def makeSumm(seq, model, cps, n_frames, nfps, picks, source, save_path, ws_score, ws_cps):
     device = "cpu" # "cuda"
     seq_len = len(seq)
@@ -213,9 +227,17 @@ def makeSumm(seq, model, cps, n_frames, nfps, picks, source, save_path, ws_score
     if not os.path.isdir(save_dir):
         os.mkdir(save_dir)
     
+    # 배경음 없는 중간 영상 임시 저장 
+    tmp_dir = "../output/tmp"
+    tmp_name = "non_bgm_vlog.mp4"
+    if not os.path.exists(tmp_dir):
+        os.mkdirs(tmp_dir)
+    tmp_path = os.path.join(tmp_dir, tmp_name)
+    
+
     # create summary video writer 
     fourcc = cv2.VideoWriter_fourcc(*'mp4v')
-    out = cv2.VideoWriter(save_path, fourcc, fps, (width, height))
+    out = cv2.VideoWriter(tmp_path, fourcc, fps, (width, height))
     thumb_frames = []
     frame_idx = 0
     start = time.time()
@@ -247,6 +269,8 @@ def makeSumm(seq, model, cps, n_frames, nfps, picks, source, save_path, ws_score
 
     out.release()
     cap.release()
+
+    bgm(tmp_path, save_path)
 
     return thumb_frames
 
