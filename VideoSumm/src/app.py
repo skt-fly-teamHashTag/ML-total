@@ -5,7 +5,6 @@ import torchvision
 import matplotlib.pyplot as plt  
 from modules.model_zoo import get_model
 from dsnet_main import video_shot_main, text_classification, makeSumm
-from hashtag import TextRank
 from qwer import qwe
 import urllib.request
 import os 
@@ -13,9 +12,6 @@ import os
 from torchvision.io.image import read_image
 from torchvision.models.detection import maskrcnn_resnet50_fpn, MaskRCNN_ResNet50_FPN_Weights
 
-# from hashtag import TextRank
-from transformers import AutoModelForSeq2SeqLM, AutoTokenizer
-from KeyBERThashtag import KeyBERTModel
 
 ## flask 
 from flask import Flask, render_template, request, jsonify
@@ -37,22 +33,6 @@ def thumb_nail_main(input_data, nick, cat):
 
     # return jsonify({'thumbnail path name':IMG_PATH})
 
-def translation_model(sentences):
-    model_name = "QuoQA-NLP/KE-T5-En2Ko-Base"
-    tokenizer = AutoTokenizer.from_pretrained(model_name)
-    model = AutoModelForSeq2SeqLM.from_pretrained(model_name)
-    translated = model.generate(**tokenizer(sentences, return_tensors="pt", padding=True))
-    ko_sentences = [tokenizer.decode(t, skip_special_tokens=True) for t in translated]
-    
-    return ko_sentences
-
-def hashtag_main(sen):
-    ko_sentences = translation_model(sen)
-    keybert = KeyBERTModel(ko_sentences)
-    hashtag = keybert.keywords
-
-    return hashtag 
-    # return jsonify({'hashtag':hashtag})
 
 # @app.route('/video_summary', methods=['POST'])
 def test():

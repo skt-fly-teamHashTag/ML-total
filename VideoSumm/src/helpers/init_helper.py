@@ -32,7 +32,7 @@ def get_parser() -> argparse.ArgumentParser:
     parser = argparse.ArgumentParser()
 
     # model type
-    parser.add_argument('model', type=str,
+    parser.add_argument('--model', type=str, default = 'anchor-based',
                         choices=('anchor-based', 'anchor-free'))
 
     # training & evaluation
@@ -46,11 +46,11 @@ def get_parser() -> argparse.ArgumentParser:
     parser.add_argument('--lr', type=float, default=5e-5)
     parser.add_argument('--weight-decay', type=float, default=1e-5)
     parser.add_argument('--lambda-reg', type=float, default=1.0)
-    parser.add_argument('--nms-thresh', type=float, default=0.5)
+    parser.add_argument('--nms-thresh', type=float, default=0.5) #default0.5
 
     # inference
     parser.add_argument('--ckpt-path', type=str, default=None)
-    parser.add_argument('--sample-rate', type=int, default=15)
+    parser.add_argument('--sample-rate', type=int, default=7) #default 15->eunsun custom=5로 변경
     parser.add_argument('--source', type=str, default=None)
     parser.add_argument('--save-path', type=str, default=None)
 
@@ -69,7 +69,7 @@ def get_parser() -> argparse.ArgumentParser:
     parser.add_argument('--neg-iou-thresh', type=float, default=0.0)
     parser.add_argument('--incomplete-iou-thresh', type=float, default=0.3)
     parser.add_argument('--anchor-scales', type=int, nargs='+',
-                        default=[4, 8, 16, 32])
+                        default=[4, 8, 16, 32]) #default=[4, 8, 16, 32]
 
     # anchor free
     parser.add_argument('--lambda-ctr', type=float, default=1.0)
@@ -79,7 +79,6 @@ def get_parser() -> argparse.ArgumentParser:
                         choices=['soft-iou', 'smooth-l1'])
 
     return parser
-
 
 def get_arguments() -> argparse.Namespace:
     parser = get_parser()
