@@ -204,5 +204,3 @@ def get_summ_f1score(pred_summ: np.ndarray,
 
     return float(final_f1)
 
-def captioning():
-    

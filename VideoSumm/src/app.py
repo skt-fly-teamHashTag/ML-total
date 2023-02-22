@@ -24,7 +24,7 @@ app = Flask(__name__) #flask 앱 초기화
 ##multiprocessing 
 from multiprocessing import Process, Pool 
 
-def thumb_nail_main(input_data):
+def thumb_nail_main(input_data, nick, cat):
     '''
     input_data: [list] 
     '''
@@ -95,6 +95,7 @@ def predict():
     total_stt, ws_obj_lst, seq, model, cps, n_frames, nfps, picks, ws_cps = video_shot_main(source_lst) #thumb_input: type==list 
     # 구간의 음성 주제 분류 
     ws_score, hashtag = text_classification(category, total_stt, ws_obj_lst)
+
     # 가중치 & 요약 영상 만들기, return 썸네일 이미지 
     thumb_input = makeSumm(seq, model, cps, n_frames, nfps, picks, source_lst, save_path, ws_score, ws_cps)
     print(f'len(thumbnail_images): {len(thumb_input)}')
@@ -103,7 +104,7 @@ def predict():
     ##썸네일 
     # thumb_input = np.load('../output/test/test7_class_thumb_9.npy', allow_pickle= True)
     # thumb_input = thumb_input.tolist()
-    thumb_path= thumb_nail_main(thumb_input)
+    thumb_path= thumb_nail_main(thumb_input, nickname, category)
     print("thumbnail successed!!")
 
 

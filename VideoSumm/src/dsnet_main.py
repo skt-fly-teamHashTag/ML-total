@@ -173,7 +173,9 @@ def video_shot_main(source):
     return total_stt, ws_obj_lst, seq, model, cps, n_frames, nfps, picks, ws_cps
 
 def text_classification(category, total_stt, ws_obj_lst):
-    ## 완소 주제 분류 & 해시태그 추출 로직 
+    ## 완소 주제 분류 & 해시태그 추출 로직
+    ws_score = []
+    hashtag =  ["#오늘", "#바다", "#가고싶다"]
 
     return ws_score, hashtag 
 
@@ -204,6 +206,11 @@ def makeSumm(seq, model, cps, n_frames, nfps, picks, source, save_path, ws_score
     height = int(cap.get(cv2.CAP_PROP_FRAME_HEIGHT))
     fps = cap.get(cv2.CAP_PROP_FPS)
 
+    # 영상 저장 경로 존재 여부 확인 
+    save_dir = "/".join(save_path.split("/")[:-1])
+    if not os.path.isdir(save_dir):
+        os.mkdir(save_dir)
+    
     # create summary video writer 
     fourcc = cv2.VideoWriter_fourcc(*'mp4v')
     out = cv2.VideoWriter(save_path, fourcc, fps, (width, height))
