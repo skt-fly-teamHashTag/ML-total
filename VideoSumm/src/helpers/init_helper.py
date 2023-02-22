@@ -36,7 +36,7 @@ def get_parser() -> argparse.ArgumentParser:
                         choices=('anchor-based', 'anchor-free'))
 
     # training & evaluation
-    parser.add_argument('--device', type=str, default='cuda',
+    parser.add_argument('--device', type=str, default='cpu',
                         choices=('cuda', 'cpu'))
     parser.add_argument('--seed', type=int, default=12345)
     parser.add_argument('--splits', type=str, nargs='+', default=[])

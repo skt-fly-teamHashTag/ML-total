@@ -13,7 +13,6 @@ import os
 from pydub import AudioSegment
 from pydub.silence import split_on_silence
 
-
 def get_audio_text(path, i, r):
     '''
     구간 내의 영상의 음성을 텍스트로 추출후 리턴 
@@ -67,16 +66,18 @@ def audio_cps_split(fps, audio_path, ws_cps, ws_audio_dir):
     i = 0
     start_time = 0 
     end_time = 0  
-    print("ws_cps: ", ws_cps)
     for frame_num in ws_cps: 
         ws_audio_path = f"ws_audio_{i}.wav"
         end_time = round(frame_num/fps, 2)
+        print(f"ws_cps time: {end_time}s")
+
         sub_sound = sound.subclip(start_time, end_time)
         sub_sound.write_audiofile(os.path.join(ws_audio_dir, ws_audio_path))
         start_time = end_time 
         i +=1
     ws_audio_path = f"ws_audio_{i}.wav"
     end_time = sound.duration
+    print(f"ws_cps time: {end_time}s")
     sub_sound = sound.subclip(start_time, end_time)
     sub_sound.write_audiofile(os.path.join(ws_audio_dir, ws_audio_path))
 
@@ -97,7 +98,6 @@ def video_shot_main(source):
     input:
        - source: lst= ['src1', 'src2', 'src3', ..]
     '''
-
     args = init_helper.get_arguments()
 
     # init setting #
@@ -175,7 +175,7 @@ def video_shot_main(source):
 def text_classification(category, total_stt, ws_obj_lst):
     ## 완소 주제 분류 & 해시태그 추출 로직
     ws_score = []
-    hashtag =  ["#오늘", "#바다", "#가고싶다"]
+    hashtag = ["오늘", "바다", "가고싶다"]
 
     return ws_score, hashtag 
 
@@ -252,7 +252,7 @@ def makeSumm(seq, model, cps, n_frames, nfps, picks, source, save_path, ws_score
 if __name__ == '__main__':
     ## video summary & save 
     print('*** start video summary ***') 
-    thumb_input, caption_images = video_shot_main() # [[image, cps_score, frame_score], ...] 
+    thumb_input, caption_images = video_shot_main() #[[image, cps_score, frame_score], ...] 
     # print(f'len(thumbnail_images): {len(thumb_input)}, len(caption_images): {len(caption_images)}')
 
 

@@ -60,9 +60,9 @@ def get_keyshot_summ(pred: np.ndarray,
                      n_frames: int,
                      nfps: np.ndarray,
                      picks: np.ndarray,
-                     proportion: float = 0.15, #knapsack capacity 
-                     ws_score: list=[], 
-                     ws_cps: list=[]
+                     proportion: float = 0.6, #knapsack capacity 
+                     ws_score: list=[],
+                     ws_cps: list=[] 
                      ) -> np.ndarray:
     """Generate keyshot-based video summary i.e. a binary vector.
 
@@ -145,7 +145,7 @@ def bbox2summary(seq_len: int,
         lo, hi = pred_bboxes[bbox_idx, 0], pred_bboxes[bbox_idx, 1]
         score[lo:hi] = np.maximum(score[lo:hi], [pred_cls[bbox_idx]])
 
-    pred_summ, thumb_nail, thumb_nail_scores  = get_keyshot_summ(score, change_points, n_frames, nfps, picks, ws_score, ws_cps)
+    pred_summ, thumb_nail, thumb_nail_scores  = get_keyshot_summ(score, change_points, n_frames, nfps, picks, ws_score = ws_score, ws_cps = ws_cps)
     return pred_summ, thumb_nail, thumb_nail_scores#key frames :1, else:0
 
 
