@@ -13,9 +13,6 @@ import os
 from torchvision.io.image import read_image
 from torchvision.models.detection import maskrcnn_resnet50_fpn, MaskRCNN_ResNet50_FPN_Weights
 
-# from ofa_main import infer_main
-from expansion_main import caption_expansion
-
 # from hashtag import TextRank
 from transformers import AutoModelForSeq2SeqLM, AutoTokenizer
 from KeyBERThashtag import KeyBERTModel
@@ -50,7 +47,6 @@ def translation_model(sentences):
     return ko_sentences
 
 def hashtag_main(sen):
-
     ko_sentences = translation_model(sen)
     keybert = KeyBERTModel(ko_sentences)
     hashtag = keybert.keywords
@@ -61,7 +57,7 @@ def hashtag_main(sen):
 # @app.route('/video_summary', methods=['POST'])
 def test():
     return {
-        'video_image': "output thumbnail image path", 
+        'video_image': "output thumbnail image path",
         'video_path': "output summ video path",
         'video_tag': ['#오늘', '#바다', '#가고싶다']
     }
@@ -92,7 +88,7 @@ def predict():
     source_lst = save_video(video_src_lst) #이 부분은 미리 저장해둬도 괜찮을 듯 
     print("video download successed from s3!!") 
 
-    save_path = '../output/vlog.mp4'
+    save_path = '../output/vlog.mp4' 
 
     ##영상요약 
     # video preprocessing & STT & ObjectDetection 
@@ -109,7 +105,7 @@ def predict():
     # thumb_input = thumb_input.tolist()
     thumb_path= thumb_nail_main(thumb_input)
     print("thumbnail successed!!")
-    
+
 
     return {
         'video_image': thumb_path, 
@@ -125,5 +121,3 @@ if __name__ == '__main__':
     # serve(app, host="0.0.0.0", port=5000)
     # app.run(debug=True)
     predict()
-
-
