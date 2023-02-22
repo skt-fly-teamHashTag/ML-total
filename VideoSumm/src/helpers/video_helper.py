@@ -22,14 +22,14 @@ class FeatureExtractor(object):
         ])
         self.model = models.googlenet(pretrained=True)
         self.model = nn.Sequential(*list(self.model.children())[:-2])
-        self.model = self.model.cuda().eval()
+        self.model = self.model.cpu().eval()
 
     def run(self, img: np.ndarray) -> np.ndarray:
         img = Image.fromarray(img)
         img = self.preprocess(img)
         batch = img.unsqueeze(0)
         with torch.no_grad():
-            feat = self.model(batch.cuda())
+            feat = self.model(batch.cpu())
             feat = feat.squeeze().cpu().numpy()
 
         assert feat.shape == (1024,), f'Invalid feature shape {feat.shape}: expected 1024'

@@ -107,7 +107,9 @@ def video_shot_main(source):
     
     audio_path = '../custom_data/audio/audio.wav' #추출 오디오 저장 위치 
     ws_audio_dir = '../custom_data/audio' #오디오 구간 분리 seg audio 저장 위치 
-    
+
+    if not os.path.exists(ws_audio_dir):
+        os.makedirs(ws_audio_dir)
 
     # load model
     print('Loading DSNet model ...')
@@ -163,7 +165,7 @@ def video_shot_main(source):
                 cur_fnum = ws_cps[k]
             tmp_dict = {}
         for key in obj_dict.keys():
-            if tmp_dict in key: 
+            if key in tmp_dict: 
                 tmp_dict[key] += obj_dict[key]
             else:
                 tmp_dict[key] = obj_dict[key]

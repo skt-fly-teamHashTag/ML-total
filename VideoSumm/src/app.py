@@ -95,10 +95,9 @@ def predict():
         'video_image': thumb_path, 
         'video_path': save_path,
         'video_tag': hashtag,
-        'user_ID': user_ID
+        'user_ID': user_ID, 
+        'niclname': nickname
     }
-
-
 
 if __name__ == '__main__': 
     # from waitress import serve
