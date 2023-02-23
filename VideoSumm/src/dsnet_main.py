@@ -296,7 +296,7 @@ def makeSumm(seq, model, cps, n_frames, nfps, picks, source, save_path, ws_score
                             break 
                         prev_text = text
                         text = total_stt[k][idx]
-         
+                    prev_text = text
                     text_duration = 0 
 
                 # 자막 샘플링 한 뒤 3초간만 유지 
