@@ -177,27 +177,44 @@ def video_shot_main(source):
 
     return total_stt, ws_obj_lst, seq, model, cps, n_frames, nfps, picks, ws_cps
 
-# def text_classification(category, total_stt, ws_obj_lst):
-#     ## 완소 주제 분류 & 해시태그 추출 로직
-#     ws_score = []
-#     hashtag = ["오늘", "바다", "가고싶다"]
-
-#     return ws_score, hashtag 
-
-def bgm(vlog_path, bgm_video_path):
+def bgm(vlog_path, bgm_video_path, ws_class, ws_cps, cat, fps, n_frames):
     
     videoclip = mp.VideoFileClip(vlog_path) #출력 브이로그 영상 
-    audioclip = mp.AudioFileClip("../custom_data/music/music1.mp3") #합성할 배경음 위치
+    
 
-    audio = mp.afx.audio_loop(audioclip, duration=videoclip.duration)
-    # audio.write_audiofile("audio.mp3") ##생성된 음성 파일 저장하기 
-    videoclip.audio = audio
+    if len(cat) == 1:
+        audioclip = mp.AudioFileClip(f"../custom_data/music/music{cat[0]}.mp3") #합성할 배경음 위치
+        new_audioclip = mp.afx.audio_loop(audioclip, duration=videoclip.duration)
+        # audio.write_audiofile("audio.mp3") ##생성된 음성 파일 저장하기 
+    else: #두 카테고리 중에 높은 카테고리의 음악을 배경으로 튼다 
+        audioclip0 = mp.AudioFileClip(f"../custom_data/music/music{cat[0]}.mp3")
+        audioclip1 = mp.AudioFileClip(f"../custom_data/music/music{cat[1]}.mp3")
+        sub_audios = []
+        for i in range(len(ws_class)):
+            if i == 0:
+                s_frame = 0 
+            else:
+                s_frame = ws_cps[i-1]
+            if i == len(ws_cps)-1:
+                e_frame = n_frames
+            else:
+                e_frame = ws_cps[i]
+            s_time = round(s_frame/fps, 2)
+            e_time = round(e_frame/fps, 2)
+
+            if ws_class == cat[0]: 
+                sub_audios.append(audioclip0.subclip(s_time, e_time))
+            else: 
+                sub_audios.append(audioclip1.subclip(s_time, e_time))
+        
+        new_audioclip = mp.CompositeAudioClip(sub_audios)
+   
+    videoclip.audio = new_audioclip
     videoclip.write_videofile(bgm_video_path)
 
     return None
 
-
-def makeSumm(seq, model, cps, n_frames, nfps, picks, source, save_path, ws_score, ws_cps, total_stt):
+def makeSumm(seq, model, cps, n_frames, nfps, picks, source, save_path, ws_score, ws_cps, total_stt, ws_class, cat):
     device = "cpu" #else, "cuda"
     seq_len = len(seq)
     nms_thresh = 0.5
@@ -327,7 +344,7 @@ def makeSumm(seq, model, cps, n_frames, nfps, picks, source, save_path, ws_score
     out.release()
     cap.release()
 
-    bgm(tmp_path, save_path)
+    bgm(tmp_path, save_path, ws_class, ws_cps, cat, fps, n_frames)
 
     return thumb_frames
 

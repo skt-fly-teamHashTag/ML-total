@@ -5,7 +5,6 @@ import torchvision
 import matplotlib.pyplot as plt  
 from modules.model_zoo import get_model
 from dsnet_main import video_shot_main, makeSumm
-from qwer import qwe
 import urllib.request
 import os
 from adot_clf_model import PredictModel
@@ -22,16 +21,15 @@ app = Flask(__name__) #flask 앱 초기화
 ##multiprocessing 
 from multiprocessing import Process, Pool 
 
-def thumb_nail_main(input_data, nick, cat):
+def thumbnail(input_data, nick, cat, save_p):
     '''
     input_data: [list] 
     '''
-    thumbnail_output = qwe(input_data)
+    thumbnail_output = make_thumbnail(input_data, nick, cat)
     
     # 썸네일 사진 저장 
-    IMG_PATH = "/home/ubuntu/output/image/thumbnail.jpg"
-    cv2.imwrite(IMG_PATH, thumbnail_output)
-    return IMG_PATH
+    cv2.imwrite(save_p, thumbnail_output)
+    return None
 
     # return jsonify({'thumbnail path name':IMG_PATH})
 
@@ -49,13 +47,13 @@ def hashtag_main(user_cat, total_stt, ws_obj_lst):
     pred = PredictModel('cpu') # 'cpu' or 'cuda'
     get_key = GetKeyword()
     get_tag = GetHashtag()
-    score = get_section_score(user_cat, total_stt, pred)
+    score, ws_class = get_section_score(user_cat, total_stt, pred)
 
     max_idx = np.argmax(score)
     temp = get_key(total_stt,max_idx)
     hashtag = get_tag(user_cat, ws_obj_lst, max_idx, temp)
 
-    return score, hashtag 
+    return score, hashtag, ws_class
 
 def save_video(video_url_lst) :
     save_dir = "../origin_video"
@@ -85,30 +83,41 @@ def predict():
     source_lst = save_video(video_src_lst) #이 부분은 미리 저장해둬도 괜찮을 듯 
     print("video download successed from s3!!") 
 
-    save_path = '/home/ubuntu/output/video/vlog.mp4' 
+    save_vlog_path = '/home/ubuntu/output/video/vlog.mp4' 
+    save_thumb_path = '/home/ubuntu/output/image/thumbnail.jpg'
 
     ##영상요약 
     # video preprocessing & STT & ObjectDetection
     total_stt, ws_obj_lst, seq, model, cps, n_frames, nfps, picks, ws_cps = video_shot_main(source_lst) #thumb_input: type==list 
     # 구간의 음성 주제 분류 
-    ws_score, hashtag = hashtag_main(category, total_stt, ws_obj_lst)
+    ws_score, hashtag, ws_class = hashtag_main(category, total_stt, ws_obj_lst)
     ws_score = [0.1, 0.2, 0.3, 0.4, 0.5, 0.6]
 
     # 가중치 & 요약 영상 만들기, return 썸네일 이미지 
-    thumb_input = makeSumm(seq, model, cps, n_frames, nfps, picks, source_lst, save_path, ws_score, ws_cps, total_stt)
+    thumb_input = makeSumm(seq, 
+                           model, 
+                           cps, 
+                           n_frames, 
+                           nfps, 
+                           picks, 
+                           source_lst, 
+                           save_vlog_path, 
+                           ws_score, 
+                           ws_cps, 
+                           total_stt, 
+                           ws_class, 
+                           category)
     # print(f'len(thumbnail_images): {len(thumb_input)}')
     print("video summary successed!!")
 
     ##썸네일 
-    # thumb_input = np.load('../output/test/test7_class_thumb_9.npy', allow_pickle= True)
-    # thumb_input = thumb_input.tolist()
-    thumb_path = make_thumbnail(thumb_input, nickname, category)
+    thumbnail(thumb_input, nickname, category, save_thumb_path)
     print("thumbnail successed!!")
 
 
     return {
-        'video_image': thumb_path, 
-        'video_path': save_path,
+        'video_image': save_thumb_path, 
+        'video_path': save_vlog_path,
         'video_tag': hashtag,
         'user_ID': user_ID, 
         'niclname': nickname

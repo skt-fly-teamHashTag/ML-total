@@ -137,7 +137,8 @@ def get_section_score(user_cat, total_stt,predict):
     output : 
         - ws_score : [score1, score2, ...]
     """
-    ws_score = []
+    ws_score = [] #각 구간별 두 카테고리의 output의 합
+    ws_class = []
 
     if len(user_cat) == 1: # 카테고리가 1개인 경우
         for sent_list in total_stt: # if ws_score is none, fill the -1 
@@ -151,10 +152,15 @@ def get_section_score(user_cat, total_stt,predict):
         for sent_list in total_stt:
             if len(sent_list) == 0: # this is conner case so we fill the -1
                 ws_score.append(-1)
+                ws_class.append(-1)
             else:
                 output = predict(sent_list)
                 idx1, idx2 = user_cat[0], user_cat[1]
                 ws_score.append(output[idx1] + output[idx2])
-    
-    return ws_score
+                if output[idx1]> output[idx2]:
+                    ws_class.append(0)
+                else: 
+                    ws_class.append(1)
+
+    return ws_score, ws_class
 
