@@ -4,14 +4,16 @@ import torch
 import torchvision 
 import matplotlib.pyplot as plt  
 from modules.model_zoo import get_model
-from dsnet_main import video_shot_main, text_classification, makeSumm
+from dsnet_main import video_shot_main, makeSumm
 from qwer import qwe
 import urllib.request
-import os 
+import os
+from adot_clf_model import PredictModel
+from adot_tag_generate import GetKeyword,GetHashtag,get_section_score
+from thumbnail_main import make_thumbnail
 
 from torchvision.io.image import read_image
 from torchvision.models.detection import maskrcnn_resnet50_fpn, MaskRCNN_ResNet50_FPN_Weights
-
 
 ## flask 
 from flask import Flask, render_template, request, jsonify
@@ -41,7 +43,20 @@ def test():
         'video_path': "output summ video path",
         'video_tag': ['#오늘', '#바다', '#가고싶다']
     }
-    
+
+def hashtag_main(user_cat, total_stt, ws_obj_lst):
+
+    pred = PredictModel('cpu') # 'cpu' or 'cuda'
+    get_key = GetKeyword()
+    get_tag = GetHashtag()
+    score = get_section_score(user_cat, total_stt, pred)
+
+    max_idx = np.argmax(score)
+    temp = get_key(total_stt,max_idx)
+    hashtag = get_tag(user_cat, ws_obj_lst, max_idx, temp)
+
+    return score, hashtag 
+
 def save_video(video_url_lst) :
     save_dir = "../origin_video"
     if not os.path.isdir(save_dir):
@@ -76,7 +91,7 @@ def predict():
     # video preprocessing & STT & ObjectDetection
     total_stt, ws_obj_lst, seq, model, cps, n_frames, nfps, picks, ws_cps = video_shot_main(source_lst) #thumb_input: type==list 
     # 구간의 음성 주제 분류 
-    ws_score, hashtag = text_classification(category, total_stt, ws_obj_lst)
+    ws_score, hashtag = hashtag_main(category, total_stt, ws_obj_lst)
     ws_score = [0.1, 0.2, 0.3, 0.4, 0.5, 0.6]
 
     # 가중치 & 요약 영상 만들기, return 썸네일 이미지 
@@ -87,7 +102,7 @@ def predict():
     ##썸네일 
     # thumb_input = np.load('../output/test/test7_class_thumb_9.npy', allow_pickle= True)
     # thumb_input = thumb_input.tolist()
-    thumb_path= thumb_nail_main(thumb_input, nickname, category)
+    thumb_path = make_thumbnail(thumb_input, nickname, category)
     print("thumbnail successed!!")
 
 

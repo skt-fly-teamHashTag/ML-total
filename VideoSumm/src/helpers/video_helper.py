@@ -63,7 +63,7 @@ class VideoPreprocessor(object):
 
             videoclip = mp.VideoFileClip(video_path) 
             audioclip = videoclip.audio #영상의 오디오 추출 
-            audio_clips.append(audioclip)
+            audio_clips.append(audioclip) 
             
             cap = cv2.VideoCapture(str(video_path))
             fps = cap.get(cv2.CAP_PROP_FPS)

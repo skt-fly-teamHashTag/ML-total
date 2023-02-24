@@ -177,12 +177,12 @@ def video_shot_main(source):
 
     return total_stt, ws_obj_lst, seq, model, cps, n_frames, nfps, picks, ws_cps
 
-def text_classification(category, total_stt, ws_obj_lst):
-    ## 완소 주제 분류 & 해시태그 추출 로직
-    ws_score = []
-    hashtag = ["오늘", "바다", "가고싶다"]
+# def text_classification(category, total_stt, ws_obj_lst):
+#     ## 완소 주제 분류 & 해시태그 추출 로직
+#     ws_score = []
+#     hashtag = ["오늘", "바다", "가고싶다"]
 
-    return ws_score, hashtag 
+#     return ws_score, hashtag 
 
 def bgm(vlog_path, bgm_video_path):
     
@@ -242,17 +242,17 @@ def makeSumm(seq, model, cps, n_frames, nfps, picks, source, save_path, ws_score
     out = cv2.VideoWriter(tmp_path, fourcc, fps, (width, height))
     thumb_frames = []
     frame_idx = 0
-    summ_frame_idx = 0
-    text_duration = 0 # 자막 샘플링마다 3초간 유지하도록 변수 초기화 
+    # summ_frame_idx = 0
+    # text_duration = 0 # 자막 샘플링마다 3초간 유지하도록 변수 초기화 
     start = time.time()
 
-    k = 0 # 현재 프레임이 어떤 ws_cps 구간에 포함되어있는지 인덱스 
-    prev_fnum = 0 
-    cur_fnum = ws_cps[k]
-    text = ""
-    prev_text = ""
-    fontpath = "fonts/gulim.ttc" #자막 폰트 설정 
-    font = ImageFont.truetype(fontpath, 50)
+    # k = 0 # 현재 프레임이 어떤 ws_cps 구간에 포함되어있는지 인덱스 
+    # prev_fnum = 0 
+    # cur_fnum = ws_cps[k]
+    # text = ""
+    # prev_text = ""
+    # fontpath = "fonts/gulim.ttc" #자막 폰트 설정 
+    # font = ImageFont.truetype(fontpath, 50)
     for i in range(len(source)):
         video_path = source[i]
         
@@ -265,57 +265,54 @@ def makeSumm(seq, model, cps, n_frames, nfps, picks, source, save_path, ws_score
             ret = cap.grab()
             ret, frame = cap.retrieve()
             
-            h, w, _ = frame.shape
+            # h, w, _ = frame.shape
 
             if not ret:
                 break
 
-            # 현재 프레임이 ws_cps 몇번째 구간인지 
-            if frame_idx > cur_fnum: 
-                k+=1
-                if k >= len(ws_cps):
-                    prev_fnum = cur_fnum 
-                    cur_fnum = n_frames
-                else:
-                    prev_fnum = cur_fnum 
-                    cur_fnum = ws_cps[k]
+            # # 현재 프레임이 ws_cps 몇번째 구간인지 
+            # if frame_idx > cur_fnum: 
+            #     k+=1
+            #     if k >= len(ws_cps):
+            #         prev_fnum = cur_fnum 
+            #         cur_fnum = n_frames
+            #     else:
+            #         prev_fnum = cur_fnum 
+            #         cur_fnum = ws_cps[k]
 
             # 요약 & 자막 
             if pred_summ[frame_idx]:
-                
-                # 자막달기 (7초에 한번씩 자막 샘플링, 3초 유지)
-                # 5초마다 자막 샘플링 
-                if summ_frame_idx % (7*fps) == 0:
-                    portion = round((frame_idx-prev_fnum)/(cur_fnum - prev_fnum), 2)
-                    idx = int(len(total_stt[k])*portion)
-                    text = total_stt[k][idx]
-                    while text==prev_text: 
-                        idx += 1
-                        if idx >= len(total_stt[k]):
-                            idx = len(total_stt[k])-1
-                            break 
-                        prev_text = text
-                        text = total_stt[k][idx]
-                    prev_text = text
-                    text_duration = 0 
+                # # 자막달기 (7초에 한번씩 자막 샘플링, 3초 유지)
+                # # 5초마다 자막 샘플링 
+                # if summ_frame_idx % (7*fps) == 0:
+                #     portion = round((frame_idx-prev_fnum)/(cur_fnum - prev_fnum), 2)
+                #     idx = int(len(total_stt[k])*portion)
+                #     text = total_stt[k][idx]
+                #     while text==prev_text: 
+                #         idx += 1
+                #         if idx >= len(total_stt[k]):
+                #             text =""
+                #             break 
+                #         prev_text = text
+                #         text = total_stt[k][idx]
+                #     prev_text = text
+                #     text_duration = 0 
 
-                # 자막 샘플링 한 뒤 3초간만 유지 
-                if text_duration <= (3*fps):
-                    # size, _ =cv2.getTextSize(text,font,1,2) #텍스트 사각형 : (폰트 스케일, 두께)에 따라
-                    # cv2.putText(frame, text, (int(w/2), h-4*size[1]), font, 3, (255, 255, 255))
-                    frame_rgb = cv2.cvtColor(frame, cv2.COLOR_BGR2RGB)
-                    pil_im = Image.fromarray(frame_rgb)
-                    draw = ImageDraw.Draw(pil_im)
-                    # 자막 텍스트 넣기 
-                    textw, texth = draw.textsize(text, font= font)
-                    draw.text((int(w/2-textw/2), int(h*0.95-texth)), text, font= font)
-                    frame = cv2.cvtColor(np.array(pil_im), cv2.COLOR_RGB2BGR)
-
-
+                # # 자막 샘플링 한 뒤 3초간만 유지 
+                # if text_duration <= (3*fps):
+                #     # size, _ =cv2.getTextSize(text,font,1,2) #텍스트 사각형 : (폰트 스케일, 두께)에 따라
+                #     # cv2.putText(frame, text, (int(w/2), h-4*size[1]), font, 3, (255, 255, 255))
+                #     frame_rgb = cv2.cvtColor(frame, cv2.COLOR_BGR2RGB)
+                #     pil_im = Image.fromarray(frame_rgb)
+                #     draw = ImageDraw.Draw(pil_im)
+                #     # 자막 텍스트 넣기 
+                #     textw, texth = draw.textsize(text, font= font)
+                #     draw.text((int(w/2-textw/2), int(h*0.95-texth)), text, font= font)
+                #     frame = cv2.cvtColor(np.array(pil_im), cv2.COLOR_RGB2BGR)
 
                 out.write(frame)
-                summ_frame_idx += 1
-                text_duration += 1
+                # summ_frame_idx += 1
+                # text_duration += 1
                    
 
         
