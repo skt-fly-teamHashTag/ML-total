@@ -13,7 +13,7 @@ from make_thumbnail_modern import make_thumbnail_modern
 
 
 def make_thumbnail(thumb_numpy, nickname, category_list):
-    a = Thumbnail(thumb_numpy.tolist(), step=5)
+    a = Thumbnail(thumb_numpy, step=5)
     vlog_message = nickname
     category = -1
     # category_dic = {0: "가족", 1: "스터디", 2: "뷰티", 3: "반려동물", 4: "운동/스포츠", 5: "음식", 6: "여행", 7: "연애/결혼", 8: "문화생활", 9: "직장인"}

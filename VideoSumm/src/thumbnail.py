@@ -4,8 +4,6 @@ import torchvision
 import numpy as npp
 import copy
 import random
-from google.colab import drive
-from google.colab.patches import cv2_imshow
 from torchvision.io.image import read_image
 from torchvision.models.detection import maskrcnn_resnet50_fpn, MaskRCNN_ResNet50_FPN_Weights
 

@@ -154,7 +154,7 @@ def video_shot_main(source):
     total_stt = audio_cps_split(fps, audio_path, ws_cps, ws_audio_dir)
 
     ## 구간별 object detection으로 검출된 물체 counting dict 구성 
-    ws_obj_lst= [] #구간별, 각 구간 내의 프레임들의 객체 딕셔너리 
+    ws_obj_lst= [[] for _ in range(len(ws_cps)+1)] #구간별, 각 구간 내의 프레임들의 객체 딕셔너리 
     tmp_dict = {} 
     k = 0
     cur_fnum = ws_cps[k]
@@ -162,7 +162,7 @@ def video_shot_main(source):
         if fnum > cur_fnum:
             ws_obj_lst.append(tmp_dict)
             k+=1
-            if k >= len(ws_cps):
+            if k >= len(ws_cps)+1:
                 cur_fnum = n_frames
             else:
                 cur_fnum = ws_cps[k]
@@ -195,17 +195,18 @@ def bgm(vlog_path, bgm_video_path, ws_class, ws_cps, cat, fps, n_frames):
                 s_frame = 0 
             else:
                 s_frame = ws_cps[i-1]
-            if i == len(ws_cps)-1:
+            if i == len(ws_class)-1:
                 e_frame = n_frames
             else:
                 e_frame = ws_cps[i]
             s_time = round(s_frame/fps, 2)
             e_time = round(e_frame/fps, 2)
+            dur = e_time - s_time 
 
             if ws_class == cat[0]: 
-                sub_audios.append(audioclip0.subclip(s_time, e_time))
+                sub_audios.append(audioclip0.subclip(0, dur))
             else: 
-                sub_audios.append(audioclip1.subclip(s_time, e_time))
+                sub_audios.append(audioclip1.subclip(0, dur))
         
         new_audioclip = mp.CompositeAudioClip(sub_audios)
    

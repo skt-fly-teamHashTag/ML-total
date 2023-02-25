@@ -84,7 +84,7 @@ class VideoPreprocessor(object):
                     tmp_num += 1
                     if tmp_num % 5 == 0: 
                         obj_dict = detection_run(source = "", model= model, stride = stride, names = names, pt = pt, im0 =frame)
-                        frame_obj_lst.append((int(n_frames/self.sample_rate), obj_dict))
+                        frame_obj_lst.append((n_frames, obj_dict))
                         tmp_num = 0
 
                     # CNN feature extraction 
