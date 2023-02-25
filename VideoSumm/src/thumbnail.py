@@ -9,9 +9,6 @@ from google.colab.patches import cv2_imshow
 from torchvision.io.image import read_image
 from torchvision.models.detection import maskrcnn_resnet50_fpn, MaskRCNN_ResNet50_FPN_Weights
 
-drive.mount("/content/gdrive")
-
-
 class Thumbnail:
     def __init__(self, input_img, step=5):
         self.input_data = input_img
