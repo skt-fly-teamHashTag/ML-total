@@ -91,7 +91,7 @@ def predict():
     total_stt, ws_obj_lst, seq, model, cps, n_frames, nfps, picks, ws_cps = video_shot_main(source_lst) #thumb_input: type==list 
     # 구간의 음성 주제 분류 
     ws_score, hashtag, ws_class = hashtag_main(category, total_stt, ws_obj_lst)
-    ws_score = [0.1, 0.2, 0.3, 0.4, 0.5, 0.6]
+    # ws_score = [0.1, 0.2, 0.3, 0.4, 0.5, 0.6]
 
     # 가중치 & 요약 영상 만들기, return 썸네일 이미지 
     thumb_input = makeSumm(seq, 
