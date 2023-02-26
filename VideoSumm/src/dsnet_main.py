@@ -180,7 +180,9 @@ def video_shot_main(source):
 def bgm(vlog_path, bgm_video_path, ws_class, ws_cps, cat, fps, n_frames):
     
     videoclip = mp.VideoFileClip(vlog_path) #출력 브이로그 영상 
-    
+    audioclip = mp.AudioFileClip(f"../custom_data/music/music0.mp3") 
+
+    '''
     if len(cat) == 1:
         audioclip = mp.AudioFileClip(f"../custom_data/music/music{cat[0]}.mp3") #합성할 배경음 위치
         new_audioclip = mp.afx.audio_loop(audioclip, duration=videoclip.duration)
@@ -210,7 +212,8 @@ def bgm(vlog_path, bgm_video_path, ws_class, ws_cps, cat, fps, n_frames):
                 sub_audios.append(audioclip1.subclip(0, dur))
         
         new_audioclip = mp.CompositeAudioClip(sub_audios)
-   
+        '''
+    new_audioclip = mp.afx.audio_loop(audioclip, duration=videoclip.duration)
     videoclip.audio = new_audioclip
     videoclip.write_videofile(bgm_video_path)
 
