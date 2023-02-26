@@ -154,19 +154,20 @@ def video_shot_main(source):
     total_stt = audio_cps_split(fps, audio_path, ws_cps, ws_audio_dir)
 
     ## 구간별 object detection으로 검출된 물체 counting dict 구성 
-    ws_obj_lst= [[] for _ in range(len(ws_cps)+1)] #구간별, 각 구간 내의 프레임들의 객체 딕셔너리 
+    ws_obj_lst= [] #구간별, 각 구간 내의 프레임들의 객체 딕셔너리 
     tmp_dict = {} 
     k = 0
     cur_fnum = ws_cps[k]
     for fnum, obj_dict in frame_obj_lst:
-        if fnum > cur_fnum:
+        if fnum >= cur_fnum:
             ws_obj_lst.append(tmp_dict)
-            k+=1
-            if k >= len(ws_cps)+1:
+            k += 1
+            if k >= len(ws_cps):
                 cur_fnum = n_frames
             else:
                 cur_fnum = ws_cps[k]
             tmp_dict = {}
+        print(f"fnum: {fnum}, cur_frame: {cur_fnum}, k: {k}")
         for key in obj_dict.keys():
             if key in tmp_dict: 
                 tmp_dict[key] += obj_dict[key]
