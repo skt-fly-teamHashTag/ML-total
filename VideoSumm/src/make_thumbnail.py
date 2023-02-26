@@ -46,14 +46,14 @@ def make_thumbnail(thumb_numpy, nickname, category_list):
         dst = make_thumbnail_bg2(background_img=a.background_img, background_output=background_output, text_f="base", text_c="white", text=vlog_message, font_scale=2, font_thickness=2)
 
     else:
-        if category in [1, 4, 9]:
-            dst = make_thumbnail_modern(input_data=input_data, outputs=outputs, message=vlog_message, tmp_img=a.background_img)
-        else:
-            mask_img = make_mask_img(outputs=outputs, input_data_img=input_data)
-            dst = make_thumbnail_fg(img_case, mask_img)
-            dst = make_thumbnail_bg1(dst1=dst, bg_image=a.background_img1, bg_c="sky", text_f="base", text_c="white",text=vlog_message, font_scale=2, font_thickness=2)
-            dst = cv2.resize(dst, (780, 430))
-            dst = make_thumbnail_daily(img=dst, message=vlog_message)
+        # if category in [1, 4, 9]:
+        #     dst = make_thumbnail_modern(input_data=input_data, outputs=outputs, message=vlog_message, tmp_img=a.background_img)
+        # else:
+        mask_img = make_mask_img(outputs=outputs, input_data_img=input_data)
+        dst = make_thumbnail_fg(img_case, mask_img)
+        dst = make_thumbnail_bg1(dst1=dst, bg_image=a.background_img1, bg_c="sky", text_f="base", text_c="white",text=vlog_message, font_scale=2, font_thickness=2)
+        dst = cv2.resize(dst, (780, 430))
+        dst = make_thumbnail_daily(img=dst, message=vlog_message)
             
     dst = cv2.resize(dst, (800, 450))
     return dst
