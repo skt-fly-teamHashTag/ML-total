@@ -146,7 +146,7 @@ def bbox2summary(seq_len: int,
         score[lo:hi] = np.maximum(score[lo:hi], [pred_cls[bbox_idx]])
 
     pred_summ, thumb_nail, thumb_nail_scores  = get_keyshot_summ(score, change_points, n_frames, nfps, picks, ws_score = ws_score, ws_cps = ws_cps)
-    return pred_summ, thumb_nail, thumb_nail_scores#key frames :1, else:0
+    return pred_summ, thumb_nail, thumb_nail_scores #key frames :1, else:0
 
 
 def get_summ_diversity(pred_summ: np.ndarray,

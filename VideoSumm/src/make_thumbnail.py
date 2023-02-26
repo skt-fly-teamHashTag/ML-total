@@ -17,6 +17,8 @@ def make_thumbnail(thumb_numpy, nickname, category_list):
     vlog_message = nickname
     category = -1
     # category_dic = {0: "가족", 1: "스터디", 2: "뷰티", 3: "반려동물", 4: "운동/스포츠", 5: "음식", 6: "여행", 7: "연애/결혼", 8: "문화생활", 9: "직장인"}
+    if len(category_list) == 0:
+        category_list.append(category_list[0]) 
 
     if random.choice([0, 1]) == 0:
         category = category_list[0]
@@ -45,7 +47,7 @@ def make_thumbnail(thumb_numpy, nickname, category_list):
 
     else:
         if category in [1, 4, 9]:
-            dst = make_thumbnail_modern(input_data=input_data, outputs=outputs, message=vlog_message)
+            dst = make_thumbnail_modern(input_data=input_data, outputs=outputs, message=vlog_message, tmp_img=a.background_img)
         else:
             mask_img = make_mask_img(outputs=outputs, input_data_img=input_data)
             dst = make_thumbnail_fg(img_case, mask_img)

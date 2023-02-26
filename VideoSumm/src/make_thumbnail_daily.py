@@ -10,8 +10,6 @@ def make_thumbnail_daily(img, message):
     bg[10:440, 10:790] = 0
     bg[10:440, 10:790] = img
 
-    print(bg.shape)
-    dst = poo_make_image(message, img)
-    print(dst.shape)
+    dst = poo_make_image(message, bg)
     
     return dst
