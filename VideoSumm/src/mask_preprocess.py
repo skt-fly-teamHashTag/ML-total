@@ -7,9 +7,9 @@ def mask_preprocess(outputs, input_data):
     tmp_dic = {}
     prior_label = [1, 18, 17]
     del_list = []
-    label_threshold = 0.9
+    label_threshold = 0.95
     img_case = -1
-    width_height_ratio = 2.5
+    width_height_ratio = 1.8
     tmp_height, tmp_width = input_data[0][0].shape[:2]
 
     for i in prior_label:
@@ -121,4 +121,5 @@ def mask_preprocess(outputs, input_data):
 
     # outputs = tmp_outputs
     # input_data_img = tmp_input_data   
-    return img_case, tmp_outputs, tmp_input_data   
+    return img_case, tmp_outputs, tmp_input_data
+

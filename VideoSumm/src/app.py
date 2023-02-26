@@ -9,7 +9,7 @@ import urllib.request
 import os
 from adot_clf_model import PredictModel
 from adot_tag_generate import GetKeyword,GetHashtag,get_section_score
-from thumbnail_main import make_thumbnail
+from make_thumbnail import make_thumbnail
 
 from torchvision.io.image import read_image
 from torchvision.models.detection import maskrcnn_resnet50_fpn, MaskRCNN_ResNet50_FPN_Weights

@@ -1,5 +1,6 @@
 import cv2
 import numpy as np
+import skimage.exposure
 
 
 def make_thumbnail_fg(img_case, mask_img):
@@ -39,7 +40,7 @@ def make_thumbnail_fg(img_case, mask_img):
             if i == 0:
                 k = (tmp_height * 9) / (h * 10)
             else:
-                k = (tmp_height * 8) / (h * 10)
+                k = (tmp_height * 9) / (h * 10)
 
             img_list[i] = cv2.resize(img_list[i], (None, None), fx=k, fy=k, interpolation=cv2.INTER_AREA)
 
@@ -47,8 +48,17 @@ def make_thumbnail_fg(img_case, mask_img):
             _, tmp = cv2.threshold(tmp, 0.9, 255, cv2.THRESH_BINARY)
 
             a, b = cv2.findContours(tmp, cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_NONE)
-            cv2.drawContours(img_list[i], a, -1, (255, 255, 255), 7)
-            img_list[i] = cv2.bitwise_and(img_list[i], img_list[i], mask=tmp)
+            # cv2.drawContours(img_list[i], a, -1, (255, 255, 255), 3, cv2.LINE_AA)
+            cv2.drawContours(img_list[i], a, -1, (255, 255, 255), 3)
+
+            tmp = cv2.cvtColor(img_list[i], cv2.COLOR_BGR2GRAY)
+            _, tmp = cv2.threshold(tmp, 0.9, 255, cv2.THRESH_BINARY)
+
+            blur = cv2.GaussianBlur(tmp, (0,0), sigmaX=3, sigmaY=3, borderType = cv2.BORDER_DEFAULT)
+            result = skimage.exposure.rescale_intensity(blur, in_range=(127.5,255), out_range=(0,255))
+            result = result.astype(np.uint8)
+
+            img_list[i] = cv2.bitwise_and(img_list[i], img_list[i], mask=result)
 
     elif img_case == 2:
         for i in range(len(img_list)):
@@ -74,8 +84,17 @@ def make_thumbnail_fg(img_case, mask_img):
             _, tmp = cv2.threshold(tmp, 0.9, 255, cv2.THRESH_BINARY)
 
             a, b = cv2.findContours(tmp, cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_NONE)
-            cv2.drawContours(img_list[i], a, -1, (255, 255, 255), 7)
-            img_list[i] = cv2.bitwise_and(img_list[i], img_list[i], mask=tmp)
+            # cv2.drawContours(img_list[i], a, -1, (255, 255, 255), 3, cv2.LINE_AA)
+            cv2.drawContours(img_list[i], a, -1, (255, 255, 255), 3)
+
+            tmp = cv2.cvtColor(img_list[i], cv2.COLOR_BGR2GRAY)
+            _, tmp = cv2.threshold(tmp, 0.9, 255, cv2.THRESH_BINARY)
+
+            blur = cv2.GaussianBlur(tmp, (0,0), sigmaX=3, sigmaY=3, borderType = cv2.BORDER_DEFAULT)
+            result = skimage.exposure.rescale_intensity(blur, in_range=(127.5,255), out_range=(0,255))
+            result = result.astype(np.uint8)
+
+            img_list[i] = cv2.bitwise_and(img_list[i], img_list[i], mask=result)
 
     elif img_case == 3:
         for i in range(len(img_list)):
@@ -99,8 +118,17 @@ def make_thumbnail_fg(img_case, mask_img):
             _, tmp = cv2.threshold(tmp, 0.9, 255, cv2.THRESH_BINARY)
 
             a, b = cv2.findContours(tmp, cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_NONE)
-            cv2.drawContours(img_list[i], a, -1, (255, 255, 255), 7)
-            img_list[i] = cv2.bitwise_and(img_list[i], img_list[i], mask=tmp)
+            # cv2.drawContours(img_list[i], a, -1, (255, 255, 255), 3, cv2.LINE_AA)
+            cv2.drawContours(img_list[i], a, -1, (255, 255, 255), 3)
+
+            tmp = cv2.cvtColor(img_list[i], cv2.COLOR_BGR2GRAY)
+            _, tmp = cv2.threshold(tmp, 0.9, 255, cv2.THRESH_BINARY)
+
+            blur = cv2.GaussianBlur(tmp, (0,0), sigmaX=3, sigmaY=3, borderType = cv2.BORDER_DEFAULT)
+            result = skimage.exposure.rescale_intensity(blur, in_range=(127.5,255), out_range=(0,255))
+            result = result.astype(np.uint8)
+
+            img_list[i] = cv2.bitwise_and(img_list[i], img_list[i], mask=result)
 
             
     for i in range(len(img_list)):

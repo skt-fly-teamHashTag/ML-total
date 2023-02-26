@@ -1,15 +1,18 @@
-import cv2
+import cv2  
 import torch
 import torchvision
-import numpy as npp
+import numpy as np
 import copy
 import random
 from torchvision.io.image import read_image
 from torchvision.models.detection import maskrcnn_resnet50_fpn, MaskRCNN_ResNet50_FPN_Weights
 
+
 class Thumbnail:
     def __init__(self, input_img, step=5):
-        self.input_data = input_img
+        self.input_data = []
+        for i in range(0, len(input_img), 2):
+            self.input_data.append(input_img[i])
         self.step = step
         self.original_height = self.input_data[0][0].shape[0]
         self.original_width = self.input_data[0][0].shape[1]
@@ -34,8 +37,8 @@ class Thumbnail:
         self.background_img4 = self.input_data[-1][0]
         self.background_img = [self.background_img2, self.background_img3, self.background_img4]
 
-        self.input_data.sort(key=lambda x:-x[2])
-        self.background_img1 = self.input_data[-1][0]
+        # self.input_data.sort(key=lambda x:-x[2])
+        self.background_img1 = sorted(self.input_data, key=lambda x:-x[2])[-1][0]
 
         self.weights = MaskRCNN_ResNet50_FPN_Weights.DEFAULT
         self.transform = self.weights.transforms()

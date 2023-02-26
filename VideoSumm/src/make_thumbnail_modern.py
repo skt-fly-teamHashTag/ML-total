@@ -1,22 +1,14 @@
 import cv2
 import numpy as np
+from font_bg import partition_make_image
 
 
-def make_thumbnail_modern(input_data, outputs):
+def make_thumbnail_modern(input_data, outputs, message):
     tmp_height, tmp_width = input_data[0].shape[:2]
+    message = message
     dst = np.zeros((tmp_height, tmp_width, 3), np.uint8)
     tmp_img_width = int(tmp_width // 3)
     
-    # for i in range(len(outputs)):
-    #     if len(outputs[i]["labels"]) != 0:
-    #         outputs[i]["labels"] = [outputs[i]["labels"].detach().numpy()[0]]
-    #         outputs[i]["scores"] = outputs[i]["scores"].detach().numpy()[0]
-    #         outputs[i]["boxes"] = outputs[i]["boxes"].detach().numpy()[0].astype("uint16")
-    #         outputs[i]["masks"] = torch.squeeze(outputs[i]["masks"], 1)
-    #         outputs[i]["masks"] = outputs[i]["masks"].detach().numpy()[0]
-    #     else:
-    #         outputs[i]["labels"] = outputs[i]["labels"].detach().numpy()
-
     for i in range(len(outputs)):
         if len(outputs[i]["labels"]) != 0:
             pt = int((outputs[i]["boxes"][0][2] - outputs[i]["boxes"][0][0]) // 2 + outputs[i]["boxes"][0][0])
@@ -43,4 +35,8 @@ def make_thumbnail_modern(input_data, outputs):
     dst = cv2.resize(dst, (800, 450))
     dst = cv2.rectangle(dst, (10, 10), (dst.shape[1] - 10, dst.shape[0] - 10), (255, 255, 255), 2)
     dst = cv2.rectangle(dst, (20, 20), (dst.shape[1] - 20, dst.shape[0] - 20), (255, 255, 255), 2)
+
+    dst = partition_make_image(message, dst)
+
     return dst
+
