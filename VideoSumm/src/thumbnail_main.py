@@ -40,16 +40,16 @@ def make_thumbnail(thumb_numpy, nickname, category_list):
 
     else:
         if category in [1, 4, 9]:
-            dst = make_thumbnail_modern(input_data=input_data, outputs=outputs)
+            dst = make_thumbnail_modern(input_data=input_data, outputs=outputs, message=vlog_message)
         else:
             mask_img = make_mask_img(outputs=outputs, input_data_img=input_data)
             dst = make_thumbnail_fg(img_case, mask_img)
             dst = make_thumbnail_bg1(dst1=dst, bg_image=a.background_img1, bg_c="sky", text_f="base", text_c="white",text=vlog_message, font_scale=2, font_thickness=2)
             dst = cv2.resize(dst, (780, 430))
             if category in [8, 0, 5, 3, 6]:
-                dst = make_thumbnail_daily(img=dst)
+                dst = make_thumbnail_daily(message=vlog_message, img=dst)
             else:
-                dst = make_thumbnail_lovely(img=dst)
+                dst = make_thumbnail_lovely(message=vlog_message, img=dst)
 
     return dst
 

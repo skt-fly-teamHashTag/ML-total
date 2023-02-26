@@ -120,7 +120,7 @@ def predict():
         'video_path': save_vlog_path,
         'video_tag': hashtag,
         'user_ID': user_ID, 
-        'niclname': nickname
+        'nickname': nickname
     }
 
 if __name__ == '__main__': 
