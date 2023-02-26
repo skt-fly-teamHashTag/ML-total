@@ -84,6 +84,9 @@ class GetHashtag():
       # hash_tag list
       hashtag = []
       
+      # keybert top-1 사용
+      hashtag.append(temp)
+
       # hash table 사용
       if len(user_cat) == 1:
           hashtag.extend(random.sample(self.hash_table[self.label[user_cat[0]]],2))

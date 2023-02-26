@@ -24,11 +24,12 @@ class BaseModel(nn.Module):
 class PredictModel():
     def __init__(self,device='cpu'):
         self.device = torch.device(device)
-        PATH = 'weights/classification_model.pt'
+        PATH = '../weights/classification_model.pt'
         self.tokenizer = BertTokenizer.from_pretrained('bert-base-multilingual-cased',
                                           do_lower_case=False)
         self.model = BaseModel()
-        self.model.load_state_dict(torch.load(PATH, map_location=device))
+        state_dict = torch.load(PATH, map_location=lambda storage, loc: storage)
+        self.model.load_state_dict(state_dict)
         self.model.to(device)
         
 
