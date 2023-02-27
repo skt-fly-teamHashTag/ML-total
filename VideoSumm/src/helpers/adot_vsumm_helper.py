@@ -60,7 +60,7 @@ def get_keyshot_summ(pred: np.ndarray,
                      n_frames: int,
                      nfps: np.ndarray,
                      picks: np.ndarray,
-                     proportion: float = 0.6, #knapsack capacity 
+                     proportion: float = 0.3, #knapsack capacity 
                      ws_score: list=[],
                      ws_cps: list=[] 
                      ) -> np.ndarray:
