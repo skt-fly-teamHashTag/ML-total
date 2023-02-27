@@ -178,7 +178,7 @@ def video_shot_main(source):
 
     return total_stt, ws_obj_lst, seq, model, cps, n_frames, nfps, picks, ws_cps
 
-def bgm(vlog_path, bgm_video_path, ws_class, ws_cps, cat, fps, n_frames):
+def bgm(vlog_path, bgm_video_path, ws_cps, cat, fps, n_frames):
     
     videoclip = mp.VideoFileClip(vlog_path) #출력 브이로그 영상 
     audioclip = mp.AudioFileClip(f"../custom_data/music/music0.mp3") 
@@ -220,7 +220,7 @@ def bgm(vlog_path, bgm_video_path, ws_class, ws_cps, cat, fps, n_frames):
 
     return None
 
-def makeSumm(seq, model, cps, n_frames, nfps, picks, source, save_path, ws_score, ws_cps, total_stt, ws_class, cat):
+def makeSumm(seq, model, cps, n_frames, nfps, picks, source, save_path, ws_score, ws_cps, total_stt, cat):
     device = "cpu" #else, "cuda"
     seq_len = len(seq)
     nms_thresh = 0.5
@@ -350,7 +350,7 @@ def makeSumm(seq, model, cps, n_frames, nfps, picks, source, save_path, ws_score
     out.release()
     cap.release()
 
-    bgm(tmp_path, save_path, ws_class, ws_cps, cat, fps, n_frames)
+    bgm(tmp_path, save_path, ws_cps, cat, fps, n_frames)
 
     return thumb_frames
 

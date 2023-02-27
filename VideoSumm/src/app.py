@@ -47,13 +47,13 @@ def hashtag_main(user_cat, total_stt, ws_obj_lst):
     pred = PredictModel('cpu') # 'cpu' or 'cuda'
     get_key = GetKeyword()
     get_tag = GetHashtag()
-    score, ws_class = get_section_score(user_cat, total_stt, pred)
+    score = get_section_score(user_cat, total_stt, pred)
 
     max_idx = np.argmax(score)
     temp = get_key(total_stt,max_idx)
     hashtag = get_tag(user_cat, ws_obj_lst, max_idx, temp)
 
-    return score, hashtag, ws_class
+    return score, hashtag
 
 def save_video(video_url_lst) :
     save_dir = "../origin_video"
@@ -90,7 +90,7 @@ def predict():
     # video preprocessing & STT & ObjectDetection
     total_stt, ws_obj_lst, seq, model, cps, n_frames, nfps, picks, ws_cps = video_shot_main(source_lst) #thumb_input: type==list 
     # 구간의 음성 주제 분류 
-    ws_score, hashtag, ws_class = hashtag_main(category, total_stt, ws_obj_lst)
+    ws_score, hashtag = hashtag_main(category, total_stt, ws_obj_lst)
     # ws_score = [0.1, 0.2, 0.3, 0.4, 0.5, 0.6]
 
     # 가중치 & 요약 영상 만들기, return 썸네일 이미지 
@@ -105,7 +105,6 @@ def predict():
                            ws_score, 
                            ws_cps, 
                            total_stt, 
-                           ws_class, 
                            category)
     # print(f'len(thumbnail_images): {len(thumb_input)}')
     print("video summary successed!!")
