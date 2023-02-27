@@ -17,7 +17,7 @@ def make_thumbnail(thumb_numpy, nickname, category_list):
     vlog_message = nickname
     category = -1
     # category_dic = {0: "가족", 1: "스터디", 2: "뷰티", 3: "반려동물", 4: "운동/스포츠", 5: "음식", 6: "여행", 7: "연애/결혼", 8: "문화생활", 9: "직장인"}
-    if len(category_list) == 0:
+    if len(category_list) == 1:
         category_list.append(category_list[0]) 
 
     if random.choice([0, 1]) == 0:
@@ -33,22 +33,22 @@ def make_thumbnail(thumb_numpy, nickname, category_list):
 
     img_case, outputs, input_data = mask_preprocess(outputs=a.outputs, input_data=a.input_data)
 
-    if img_case == 4:
-        background_img_list = []
+    # if img_case == 4:
+    #     background_img_list = []
 
-        for i in range(len(a.background_img)):
-            background_img_list.append(a.tt(a.background_img[i]))
+    #     for i in range(len(a.background_img)):
+    #         background_img_list.append(a.tt(a.background_img[i]))
 
-        torch_bg_list = [a.transform(tmp) for tmp in background_img_list]
+    #     torch_bg_list = [a.transform(tmp) for tmp in background_img_list]
 
-        with torch.no_grad():
-            background_output = a.model(torch_bg_list)
-        dst = make_thumbnail_bg2(background_img=a.background_img, background_output=background_output, text_f="base", text_c="white", text=vlog_message, font_scale=2, font_thickness=2)
+    #     with torch.no_grad():
+    #         background_output = a.model(torch_bg_list)
+    #     dst = make_thumbnail_bg2(background_img=a.background_img, background_output=background_output, text_f="base", text_c="white", text=vlog_message, font_scale=2, font_thickness=2)
 
+    # else:
+    if category in [1, 4, 9]:
+        dst = make_thumbnail_modern(input_data=input_data, outputs=outputs, message=vlog_message, tmp_img=a.background_img)
     else:
-        # if category in [1, 4, 9]:
-        #     dst = make_thumbnail_modern(input_data=input_data, outputs=outputs, message=vlog_message, tmp_img=a.background_img)
-        # else:
         mask_img = make_mask_img(outputs=outputs, input_data_img=input_data)
         dst = make_thumbnail_fg(img_case, mask_img)
         dst = make_thumbnail_bg1(dst1=dst, bg_image=a.background_img1, bg_c="sky", text_f="base", text_c="white",text=vlog_message, font_scale=2, font_thickness=2)

@@ -24,6 +24,7 @@ def make_thumbnail_bg1(dst1, bg_image, bg_c="sky", text_f="base", text_c="white"
     mask_inv = cv2.bitwise_not(mask)
 
     masked_fg = cv2.bitwise_and(dst1, dst1, mask=mask)
+    dst2 = cv2.resize(dst2, (800, 450))
     masked_bg = cv2.bitwise_and(dst2, dst2, mask=mask_inv)
     dst = masked_fg + masked_bg
 
