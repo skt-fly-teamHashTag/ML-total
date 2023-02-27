@@ -27,38 +27,43 @@ def make_thumbnail_fg(img_case, mask_img):
             img_list.append(tmp)
     
     if img_case == 1:
-        for i in range(len(img_list)):
-            tmp = cv2.cvtColor(img_list[i], cv2.COLOR_BGR2GRAY)
-            _, tmp = cv2.threshold(tmp, 0.9, 255, cv2.THRESH_BINARY)
+        if len(img_list) == 2:
+            for i in range(len(img_list)):
+                tmp = cv2.cvtColor(img_list[i], cv2.COLOR_BGR2GRAY)
+                _, tmp = cv2.threshold(tmp, 1, 255, cv2.THRESH_BINARY)
 
-            cnt, labels, stats, centroids = cv2.connectedComponentsWithStats(tmp)
-            (x, y, w, h, area) = stats[1]
+                cnt, labels, stats, centroids = cv2.connectedComponentsWithStats(tmp)
+                centroids = centroids.astype(np.int64)
+                (x, y, w, h, area) = stats[1]
 
-            m = np.float32([[1, 0, -x], [0, 1, -y]])
-            img_list[i] = cv2.warpAffine(img_list[i], m, (0, 0))
+                if i == 0:
+                    shift_x = 10
+                    shift_y = tmp_height - h
+                else:
+                    shift_x = tmp_width - w - 10
+                    shift_y = tmp_height - h
+                m = np.float32([[1, 0, int(shift_x)], [0, 1, int(shift_y)]])
+                img_list[i] = cv2.warpAffine(img_list[i], m, (0, 0))
+        else:
+            for i in range(len(img_list)):
+                tmp = cv2.cvtColor(img_list[i], cv2.COLOR_BGR2GRAY)
+                _, tmp = cv2.threshold(tmp, 1, 255, cv2.THRESH_BINARY)
 
-            if i == 0:
-                k = (tmp_height * 9) / (h * 10)
-            else:
-                k = (tmp_height * 9) / (h * 10)
+                cnt, labels, stats, centroids = cv2.connectedComponentsWithStats(tmp)
+                centroids = centroids.astype(np.int64)
+                (x, y, w, h, area) = stats[1]
 
-            img_list[i] = cv2.resize(img_list[i], (None, None), fx=k, fy=k, interpolation=cv2.INTER_AREA)
-
-            tmp = cv2.cvtColor(img_list[i], cv2.COLOR_BGR2GRAY)
-            _, tmp = cv2.threshold(tmp, 0.9, 255, cv2.THRESH_BINARY)
-
-            a, b = cv2.findContours(tmp, cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_NONE)
-            # cv2.drawContours(img_list[i], a, -1, (255, 255, 255), 3, cv2.LINE_AA)
-            cv2.drawContours(img_list[i], a, -1, (255, 255, 255), 3)
-
-            tmp = cv2.cvtColor(img_list[i], cv2.COLOR_BGR2GRAY)
-            _, tmp = cv2.threshold(tmp, 0.9, 255, cv2.THRESH_BINARY)
-
-            blur = cv2.GaussianBlur(tmp, (0,0), sigmaX=3, sigmaY=3, borderType = cv2.BORDER_DEFAULT)
-            result = skimage.exposure.rescale_intensity(blur, in_range=(127.5,255), out_range=(0,255))
-            result = result.astype(np.uint8)
-
-            img_list[i] = cv2.bitwise_and(img_list[i], img_list[i], mask=result)
+                if i == 0:
+                    shift_x = (tmp_width - w) // 2
+                    shift_y = tmp_height - h
+                elif i == 1:
+                    shift_x = tmp_width - w
+                    shift_y = tmp_height - h
+                elif i == 2:
+                    shift_x = 0
+                    shift_y = tmp_height - h
+                m = np.float32([[1, 0, int(shift_x)], [0, 1, int(shift_y)]])
+                img_list[i] = cv2.warpAffine(img_list[i], m, (0, 0))
 
     elif img_case == 2:
         for i in range(len(img_list)):
