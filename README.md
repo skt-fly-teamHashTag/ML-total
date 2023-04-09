@@ -1,8 +1,10 @@
 # ML-total merged source 
 
-### 영상요약 
+Videosumm/src - main source code folder 
 
-### 썸네일 추출 
+ㄴ adot_main.py - ml 모델 전체 main 
 
-### 해시태그 추출 
+ㄴ dsnet_main.py - DsNet baseline model 
+
+ㄴ adot_clf_model.py - 구간별 주제 분류 모델
 
